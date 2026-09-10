@@ -215,9 +215,7 @@ terraform-provider-hcloudimage/
 ├── test/fixtures/             # Nix derivations for Alpine test images (amd64/aarch64)
 ├── .github/workflows/
 │   ├── ci.yml                 # lint + unit + hermetic (every PR)
-│   ├── acceptance.yml         # real Hetzner, gated
-│   ├── release.yml            # goreleaser on tag
-│   └── cleanup.yml            # scheduled orphan sweep
+│   └── release.yml            # goreleaser on tag
 ├── .goreleaser.yml
 ├── terraform-registry-manifest.json
 ├── flake.nix / flake.lock
@@ -291,8 +289,13 @@ This deliberately uses the official provider as the *consumer* of your snapshot 
 - Cheapest server types only (`cx22` / `cax11`); smallest viable fixture; short timeouts.
 - Pin the `hcloud` provider to a version range in the test config so an upstream release can't turn the suite red for unrelated reasons.
 - Deferred cleanup that runs even on test failure; fail loudly if cleanup fails.
-- A scheduled `cleanup.yml` job runs `hcloud-upload-image cleanup` (label-scoped) to sweep orphans left by crashed runs.
-- Never run acceptance tests on PRs from forks (secret exposure).
+- ~~A scheduled `cleanup.yml` job runs `hcloud-upload-image cleanup` (label-scoped) to sweep orphans left by crashed runs.~~ Orphans are swept by running `hcloud-upload-image cleanup` locally.
+- ~~Never run acceptance tests on PRs from forks (secret exposure).~~ No workflow runs them at all.
+
+> **Superseded by change `drop-billable-hetzner-ci` (2026-09-10):** `acceptance.yml` and
+> `cleanup.yml` no longer exist. Billable live-Hetzner CI was dropped as disproportionate for
+> an open-source component; the `TF_ACC`/`HCLOUD_TOKEN`-gated acceptance suite stays in the
+> tree as an opt-in local run. See `openspec/specs/acceptance-tests/`.
 
 ---
 
@@ -304,7 +307,7 @@ This deliberately uses the official provider as the *consumer* of your snapshot 
 - `nix flake check` → runs the hermetic lifecycle test (8.2).
 - Verify generated docs are up to date (`tfplugindocs generate` produces no diff).
 
-**`acceptance.yml`** — on `workflow_dispatch`, `push` to `main`, and a nightly `schedule`; **not** on PRs:
+**`acceptance.yml`** — *removed; superseded by `drop-billable-hetzner-ci`. The description below is historical:*
 - Uses repo secret `HCLOUD_TOKEN`. Concurrency-limited (one at a time). `TF_ACC=1 go test`.
 - Pulls **both** `nivis-project/hcloudimage` (local build) and `hetznercloud/hcloud` — the acceptance config composes them (§8.3). The hermetic layer (8.2) does **not** need `hcloud`; don't wire it there.
 - Architecture matrix: `x86` always; `arm` gated behind a `workflow_dispatch` input / label (default off on nightly to contain cost) but **always run before a release**. arm builds/uses the aarch64 fixture (§7 builder note).
@@ -313,7 +316,8 @@ This deliberately uses the official provider as the *consumer* of your snapshot 
 **`release.yml`** — on tag `v*.*.*`:
 - `goreleaser release --clean`, GPG-signing artifacts (Section 10).
 
-**`cleanup.yml`** — nightly `schedule`: label-scoped orphan sweep against the CI project.
+~~**`cleanup.yml`** — nightly `schedule`: label-scoped orphan sweep against the CI project.~~
+*Removed; superseded by `drop-billable-hetzner-ci`.*
 
 ---
 
@@ -361,7 +365,7 @@ Adopt SemVer; start at `v0.1.0`. Keep `CHANGELOG.md` (Keep a Changelog style).
 - [ ] **Hermetic NixOS-VM lifecycle test passes under `nix flake check`** (apply/replace/in-place/destroy), under both `terraform` and `tofu`.
 - [ ] Acceptance tests exist, are gated, and pass against a real project: config composes `hcloudimage_image` + official `hcloud_server`; boots from the snapshot; asserts guest reachability via SSH with a baked throwaway key (not just `running`); covers **both** `x86` and `arm`; contains cost controls + guaranteed cleanup.
 - [ ] `packages.test-image-{x86,arm}` produce reproducible Alpine `.raw.xz` fixtures with the baked key.
-- [ ] `ci.yml`, `acceptance.yml`, `release.yml`, `cleanup.yml` present and correct.
+- [ ] `ci.yml` and `release.yml` present and correct. *(Superseded by `drop-billable-hetzner-ci`: `acceptance.yml` and `cleanup.yml` were dropped — no CI workflow may consume billable Hetzner resources.)*
 - [ ] `goreleaser` config produces signed, registry-shaped artifacts; `terraform-registry-manifest.json` present.
 - [ ] `tfplugindocs`-generated `docs/` committed and diff-clean in CI.
 - [ ] `flake.nix` exposes devShell, package, `checks.hermetic-e2e`, and `provider-mirror`.
@@ -378,7 +382,7 @@ Adopt SemVer; start at `v0.1.0`. Keep `CHANGELOG.md` (Keep a Changelog style).
 4. **Real uploader**: wire `hcloudimages/v2` behind the interface; examples + `validate`.
 5. **Hermetic NixOS-VM test** wired into `flake check`. ← DoD gate.
 6. **CI**: `ci.yml` (lint/unit/hermetic/validate/docs-diff).
-7. **Fixtures + acceptance**: `packages.test-image-{x86,arm}` (Alpine + baked key); `acceptance.yml` composing the official `hcloud` provider, SSH-reachability assertion, cost controls, `cleanup.yml`; verified against a real project for both `x86` and `arm`.
+7. **Fixtures + acceptance**: `packages.test-image-{x86,arm}` (Alpine + baked key); `acceptance.yml` composing the official `hcloud` provider, SSH-reachability assertion, cost controls, `cleanup.yml`; verified against a real project for both `x86` and `arm`. *(The two workflows were later dropped — see `drop-billable-hetzner-ci`; the suite itself is an opt-in local run.)*
 8. **Release**: goreleaser + signing + manifest + docs; cut `v0.1.0`.
 9. **Registry + mirror**: publish; document Nivis mirror consumption.
 
@@ -398,7 +402,7 @@ The agent stubs/documents these; you do them:
 ## 15. Cost & safety guardrails (summary)
 
 - Use a **separate, isolated Hetzner project** for CI with a spend alert.
-- Acceptance tests: cheapest server types, smallest image, short timeouts, guaranteed cleanup, nightly orphan sweep, never on fork PRs, concurrency-limited.
+- Acceptance tests: cheapest server types, smallest image, short timeouts, guaranteed cleanup. *(Superseded by `drop-billable-hetzner-ci`: the nightly orphan sweep, fork-PR exclusion and concurrency limit were CI-workflow controls; no workflow touches Hetzner any more, so orphans are swept locally with `hcloud-upload-image cleanup`.)*
 - No skip-cleanup knob in the public schema.
 
 ---

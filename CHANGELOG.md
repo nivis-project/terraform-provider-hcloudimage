@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Removed
+
+- CI workflows that required a paid Hetzner project: `acceptance.yml` (nightly and
+  push-to-main live e2e) and `cleanup.yml` (nightly label-scoped orphan sweep). Billable
+  live-infra CI is disproportionate for an open-source component, and neither workflow ever
+  did real work — `HCLOUD_TOKEN` was never provisioned. The `TF_ACC`-gated acceptance suite
+  stays in the tree as an opt-in local run; `ci.yml` and `release.yml` (both hermetic) are
+  unaffected.
+
 ## [0.1.0]
 
 Initial release — the PoC / alpha base.

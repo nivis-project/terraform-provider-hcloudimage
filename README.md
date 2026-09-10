@@ -161,14 +161,16 @@ The acceptance test composes the official `hcloud` provider, boots a server from
 the produced snapshot, and **SSHes into the guest** to read `/etc/os-release` —
 proving real reachability, not just that the hypervisor reports `running`.
 
-**Cost & safety controls** (enforced in CI, `acceptance.yml`):
+**Cost & safety controls** (in the test code and in your own project — no CI
+workflow ever touches Hetzner):
 
 - cheapest server types only (`cx22` / `cax11`), smallest fixture, short timeouts;
 - `hcloud` provider pinned to `~> 1.48`;
 - deferred cleanup that runs even on failure;
-- a nightly `cleanup.yml` orphan sweep (`hcloud-upload-image cleanup`);
-- never runs on fork PRs; concurrency-limited to one run at a time;
-- the arm leg is toggle-gated (default off nightly, always on before a release).
+- if a run crashes hard enough to leak resources, sweep the orphans yourself:
+  `nix develop --command hcloud-upload-image cleanup`;
+- the arm leg is toggle-gated (`HCLOUDIMAGE_ACC_RUN_ARM=1`), so you only pay
+  for it when you ask for it.
 
 ### The aarch64 build path
 
