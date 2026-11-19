@@ -106,6 +106,11 @@
       # (BRIEFING.md §8.2, §12). Linux-only (needs a VM builder). Picked up by
       # `nix flake check`.
       checks = forLinuxSystems (pkgs: {
+        readme-header = pkgs.runCommand "readme-header" { } ''
+          bash ${./scripts/check-readme-header.sh} ${./README.md} terraform-provider-hcloudimage "early but real"
+          touch $out
+        '';
+
         hermetic-e2e = import ./test/e2e/hermetic.nix {
           inherit pkgs;
           provider = providerFor pkgs;

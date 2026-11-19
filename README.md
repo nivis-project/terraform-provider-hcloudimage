@@ -1,8 +1,25 @@
-# terraform-provider-hcloudimage
+<p align="center">
+  <a href="https://nivis.tf"><img src="https://nivis.tf/favicon.svg" alt="Nivis" width="72"></a>
+</p>
 
-[![CI](https://github.com/nivis-project/terraform-provider-hcloudimage/actions/workflows/ci.yml/badge.svg)](https://github.com/nivis-project/terraform-provider-hcloudimage/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/nivis-project/terraform-provider-hcloudimage/branch/main/graph/badge.svg)](https://codecov.io/gh/nivis-project/terraform-provider-hcloudimage)
-[![License: MPL-2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](./LICENSE)
+<h1 align="center">terraform-provider-hcloudimage</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/status-early%20but%20real-2d8dd2" alt="Status: early but real">
+  <a href="https://github.com/nivis-project/terraform-provider-hcloudimage/actions/workflows/ci.yml"><img src="https://github.com/nivis-project/terraform-provider-hcloudimage/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/nivis-project/terraform-provider-hcloudimage"><img src="https://codecov.io/gh/nivis-project/terraform-provider-hcloudimage/branch/main/graph/badge.svg" alt="codecov"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2d8dd2" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  Terraform and OpenTofu provider for uploading raw disk images to Hetzner Cloud as reusable snapshots.
+</p>
+
+<p align="center">
+  <a href="https://nivis.tf">nivis.tf</a> ·
+  <a href="https://github.com/nivis-project/nivis">nivis</a> ·
+  <a href="https://docs.nivis.tf/">Docs</a>
+</p>
 
 A Terraform / OpenTofu provider that uploads a raw disk image into a Hetzner
 Cloud project and turns it into a reusable snapshot, using the rescue-server
@@ -189,4 +206,8 @@ silently upload an x86 image.
 
 ## License
 
-[MPL-2.0](./LICENSE).
+[MIT](./LICENSE).
+
+---
+
+<p align="center"><sub>Part of the <a href="https://nivis.tf">Nivis</a> project: Terraform providers as first-class Nix values. Main repository: <a href="https://github.com/nivis-project/nivis">nivis-project/nivis</a>.</sub></p>
