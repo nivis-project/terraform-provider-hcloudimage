@@ -26,3 +26,11 @@ that names the Nivis project and links nivis.tf and the main repository.
 - WHEN `nix flake check` runs
 - THEN the `readme-header` check passes, and it fails if the header, the status
   or the footer is removed or changed.
+
+### Requirement: The footer quotes the organisation tagline
+The README footer SHALL quote the tagline of the Nivis organisation, "Terraform
+resources as Nix values.", in the same words as nivis.tf.
+
+#### Scenario: the footer's words
+- WHEN the README's last line is read
+- THEN it says "Part of the Nivis project: Terraform resources as Nix values."
